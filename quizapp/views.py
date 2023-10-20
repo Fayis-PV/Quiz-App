@@ -269,27 +269,9 @@ class ClientUserAnswerView(generics.ListCreateAPIView):
         questions = Question.objects.filter(level__value = level_value)
         print(questions)
         if questions.count() == user_progress.total_questions:
-            ### I want to redirect into ClientUserAnswerView.update function
-            # Provide function for that
-            # if user_progress.completed_questions == Level.objects.get(value = level_value).correct_answers:
+            
             return redirect('/user-progress/')
-            #     next_level = Level.objects.filter(value__gt=user_progress.level.value).first()
-
-            #     if next_level:
-            #         user_progress.level = next_level
-            #         user_progress.completed_questions = 0
-            #         user_progress.total_questions = 0
-            #         user_progress.save()
-            #         context = {
-            #             'level' : next_level
-            #         }
-            #         return render(request,'progress.html',context)
-            #     else:
-            #         user_progress.is_completed = True
-            #         message = "All levels completed."
-            # else:
-            #     print('You have failed')
-            #     message = 'You have failed'
+            
         else:
             answered_questions = UserAnswer.objects.filter(user=user, question__level_id=user_answer.question.level.id)
             next_question = Question.objects.filter(level_id=user_answer.question.level.id).exclude(id__in=answered_questions.values('question_id')).first()
