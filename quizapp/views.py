@@ -159,12 +159,12 @@ class ClientQuestionListView(generics.ListAPIView):
     serializer_class = QuestionSerializer
 
     def get_queryset(self):
-        level_id = self.kwargs['level_id']
         user_id = self.request.user.id  # Replace with your actual user ID or retrieve it dynamically
 
         # Find questions for the current level that the user hasn't answered
-        answered_questions = UserAnswer.objects.filter(user=user_id, question__level_id=level_id)
-        questions = Question.objects.filter(level_id=level_id).exclude(id__in=answered_questions.values('question_id'))
+        user_level_id = UserProgress.objects.get(user=user_id).level.id
+        answered_questions = UserAnswer.objects.filter(user=user_id, question__level_id=user_level_id)
+        questions = Question.objects.filter(level_id = user_level_id).exclude(id__in=answered_questions.values('question_id'))
 
         return questions
 
@@ -272,14 +272,7 @@ class ClientUserAnswerView(generics.ListCreateAPIView):
             return redirect('/user-progress/')
             
         else:
-            answered_questions = UserAnswer.objects.filter(user=user, question__level_id=user_answer.question.level.id)
-            next_question = Question.objects.filter(level_id=user_answer.question.level.id).exclude(id__in=answered_questions.values('question_id')).first()
-            print(next_question)
-            context = {
-                'user': 1,
-                'question' : next_question
-                }
-            return render(request,'quiz.html',context)
+            return redirect('/question/')
         
 class DeleteUserAnswerView(generics.ListAPIView):
     queryset = UserAnswer.objects.all()
@@ -292,5 +285,5 @@ class DeleteUserAnswerView(generics.ListAPIView):
         user_progress = UserProgress.objects.get(user=user)
         user_progress.delete()
 
-        return redirect('/question/1')
+        return redirect('')
 
