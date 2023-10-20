@@ -23,5 +23,7 @@ urlpatterns= [
     path('user-progress/',ClientUserProgressView.as_view(),name='client_user_progress'),
     path('user-answers/', ClientUserAnswerView.as_view(), name='user-answer-list'),
 
+    path('delete-user',DeleteUserAnswerView.as_view(),name='delete_user_answer'),
+
     
 ]

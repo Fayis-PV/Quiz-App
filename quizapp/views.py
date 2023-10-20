@@ -267,9 +267,8 @@ class ClientUserAnswerView(generics.ListCreateAPIView):
         level_value = question.level.value
 
         questions = Question.objects.filter(level__value = level_value)
-        print(questions)
+
         if questions.count() == user_progress.total_questions:
-            
             return redirect('/user-progress/')
             
         else:
@@ -280,10 +279,18 @@ class ClientUserAnswerView(generics.ListCreateAPIView):
                 'user': 1,
                 'question' : next_question
                 }
-            message = "Answer submitted successfully."
             return render(request,'quiz.html',context)
-        print(message)
+        
+class DeleteUserAnswerView(generics.ListAPIView):
+    queryset = UserAnswer.objects.all()
+    serializer_class = UserAnswerSerializer
 
-        return Response({"message": message}, status=status.HTTP_201_CREATED)
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        user_answer = UserAnswer.objects.filter(user=user)
+        user_answer.delete()
+        user_progress = UserProgress.objects.get(user=user)
+        user_progress.delete()
 
+        return redirect('/question/1')
 
