@@ -235,6 +235,23 @@ class ClientUserAnswerView(generics.ListCreateAPIView):
     queryset = UserAnswer.objects.all()
     serializer_class = UserAnswerSerializer
 
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        question = Question.objects.filter(level__value = 1).first()
+        try:
+            user_progress = UserProgress.objects.get(user=user, level=question.level)
+        except UserProgress.DoesNotExist:
+            # UserProgress does not exist, create it
+            user_progress, created = UserProgress.objects.get_or_create(user=user, level=question.level)
+        except MultipleObjectsReturned:
+            # Multiple UserProgress objects found, take the first one
+            user_progress = UserProgress.objects.filter(user=user, level=question.level).first()
+
+        if user_progress.is_completed:
+            return redirect('/user-progress/')
+        else:
+            return redirect('/question/')
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -285,5 +302,5 @@ class DeleteUserAnswerView(generics.ListAPIView):
         user_progress = UserProgress.objects.get(user=user)
         user_progress.delete()
 
-        return redirect('')
+        return redirect('/user-answers/')
 
