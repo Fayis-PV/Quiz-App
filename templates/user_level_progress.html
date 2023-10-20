@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}User Status{% endblock title %}
+
+{% block content %}
+<form class="form-control w-full max-w-xs" method="post" action="/user-level-progress">
+    <label class="label">
+        <span class="label-text">User:</span>
+    </label>
+    <select name="user_id" class="select select-bordered w-full max-w-xs" required>
+        <option value="" disabled selected>Select a User</option>
+        {% for user in users %}
+            <option value="{{ forloop.counter }}">{{ user }}</option>
+        {% endfor %}
+    </select>
+    <label class="label">
+        <span class="label-text">Level:</span>
+    </label>
+    <select name="level" class="select select-bordered w-full max-w-xs" required>
+        <option value="" disabled selected>Select a level</option>
+        {% for level in levels %}
+            <option value="{{ level.id }}">{{ level }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-info mt-4">Submit</button>
+
+{% endblock content %}

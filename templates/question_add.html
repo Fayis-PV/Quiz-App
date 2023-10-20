@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Add Question{% endblock title %}
+
+{% block content %}
+<form class="form-control w-full max-w-xs" method="post" action="/adm/add-question">
+    <label class="label">
+        <span class="label-text">Level:</span>
+    </label>
+    <select name="level" class="select select-bordered w-full max-w-xs" required>
+        <option value="" disabled selected>Select a level</option>
+        {% for level in levels %}
+            <option value="{{ forloop.counter }}">{{ level }}</option>
+        {% endfor %}
+    </select>
+
+    <label class="label">
+        <span class="label-text">Question Text:</span>
+    </label>
+    <input type="text" name="question_text" placeholder="Enter Question Text" class="input input-bordered w-full max-w-xs" required>
+
+    <label class="label">
+        <span class="label-text">Choices:</span>
+    </label>
+    <div id="choices-container">
+        <div class="choice">
+            <div class="flex items-center">
+                <input type="text" placeholder="Enter Choice" class="input input-bordered w-full max-w-xs" name="choices" required>
+                <label class="label m-2">
+                    <span class="label-text-alt">Correct:</span>
+                </label>
+                <input type="radio" name="correct_choice" value="0">
+            </div>
+        </div>
+    </div>
+
+    <button type="button" id="add-choice" class="btn mt-2">Add Choice</button>
+    <button type="submit" class="btn btn-info mt-4">Submit</button>
+</form>
+
+<script>
+    document.getElementById('add-choice').addEventListener('click', function() {
+        const choicesContainer = document.getElementById('choices-container');
+        const choiceCount = choicesContainer.querySelectorAll('.choice').length;
+
+        const newChoice = document.createElement('div');
+        newChoice.classList.add('choice');
+        newChoice.classList.add('mt-1');
+        newChoice.innerHTML = `
+        <div class="flex items-center">
+            <input type="text" placeholder="Enter Choice" class="input input-bordered w-full max-w-xs" name="choices" required>
+            <label class="label m-2">
+                <span class="label-text-alt">Correct:</span>
+            </label>
+            <input type="radio" name="correct_choice" value="${choiceCount}">
+        </div>
+        `;
+
+        choicesContainer.appendChild(newChoice);
+    });
+</script>
+
+{% endblock content %}

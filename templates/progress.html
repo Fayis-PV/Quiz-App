@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Quiz{% endblock title %}
+{% block content %}
+
+{% if user.is_authenticated %}<h4>Congratulation {{user}}!</h4>{% endif %}
+<h3>You have Completed the level. Welcome to next level.</h3>
+<a class="btn btn-primary" href="{% url "quizapp:client_question_list" level.id %}">Level: {{level}}</a>
+{% endblock %}

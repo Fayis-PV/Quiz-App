@@ -1,0 +1,5 @@
+Env/
+.sqlite3
+__pycache__/
+migrations/
+.git

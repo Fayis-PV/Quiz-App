@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Quiz{% endblock title %}
+{% block content %}
+{% if question %}
+<form class="form-control w-full max-w-xs" method="post" action="/user-answers/">
+    {% csrf_token %}
+    <label class="label">
+        <span class="label-text h3">{{question.question_text}}</span>
+        {% comment %} <input type="hidden" name="user" value="{{user}}"> {% endcomment %}
+        <input type="hidden" name="question" value="{{question.id}}">
+    </label>
+    {% comment %} <input type="text" name="question_text" placeholder="Enter Question Text" class="input input-bordered w-full max-w-xs" required> {% endcomment %}
+
+    <label class="label">
+        <span class="label-text">Select the correct choice:</span>
+    </label>
+
+    <div id="choices-container">
+        {% for choice in question.choice_set.all %}
+            <div class="choice">
+                <div class="flex items-center">
+                    {% comment %} <label class="label m-2">
+                        <span class="label-text-alt">Correct:</span>
+                    </label> {% endcomment %}
+                    <input type="radio" name="selected_choice" value="{{ choice.id }}" id="choice_{{ choice.id }}">
+                    <label class="label" name="choices" value="{{choice}}" for="choice_{{ choice.id }}">{{choice}}</label>
+                    
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <button type="submit" class="btn btn-info mt-4">Submit</button>
+
+<form>
+    {% else %}
+    <p> Something went wrong. Can't get the question</p>
+    {% endif %}
+
+{% endblock content %}
