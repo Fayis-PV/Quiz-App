@@ -28,6 +28,9 @@ class Question(models.Model):
 
     def level_id(self):
         return self.level.id
+    
+    def get_correct_choice(self):
+        return self.choice_set.get(is_correct=True)
 
 
 class Choice(models.Model):

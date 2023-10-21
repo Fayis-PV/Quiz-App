@@ -232,11 +232,10 @@ class ClientUserProgressView(generics.RetrieveUpdateAPIView):
         for user_answer in user_answers:
             if user_answer.selected_choice.is_correct:
                 correct_answers += 1
-
+        print(correct_answers)
         if correct_answers >= user_progress.level.correct_answers:
             # Update user progress to the next level
             next_level = Level.objects.filter(value__gt=user_progress.level.value).first()
-            # print(next_level)
 
             if next_level:
                 user_progress.level = next_level
@@ -244,10 +243,25 @@ class ClientUserProgressView(generics.RetrieveUpdateAPIView):
                 user_progress.total_questions = 0
                 user_progress.is_completed = False
                 user_progress.save()
+                
+                # Parse user answers of the questions of the level and its right answers to display them in the user progress page
+                questions_data = []
+                questions = Question.objects.filter(level=user_progress.level)
+                for question in questions:
+                    user_answer = UserAnswer.objects.get(user=request.user, question=question)
+                    question_data = {'question': question.question_text,
+                                     'data':{
+                                          'correct_answer': question.get_correct_choice().choice_text,
+                                          'user_answer': user_answer.selected_choice.choice_text,
+                                            'is_correct': user_answer.is_correct,}}
+                    questions_data.append(question_data)
+                
                 context = {
-                    'level' : next_level
+                    'level' : next_level,
+                    'questions_data': questions_data,
                 }
                 return render(request,'progress.html',context)
+            
             else:
                 user_progress.is_completed = True
                 # Uncomment the following line to delete all user answers when all levels are completed (if the user allowed to check each level even after completion)
