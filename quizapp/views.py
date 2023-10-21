@@ -171,8 +171,10 @@ class ClientQuestionListView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
 
         # Uncomment the following line to allow users to view the previous levels (if the user allowed to check each level even after completion)
-        level_value = kwargs.get('level_value')
+        level_value = request.GET.get('level_value') 
+        print(level_value)
         if level_value:
+            level_value = int(level_value)
             # Check if the user has completed the previous levels before proceeding
             user_progress = UserProgress.objects.get(user=request.user)
             if user_progress.level.value < level_value:
@@ -182,11 +184,12 @@ class ClientQuestionListView(generics.ListAPIView):
                     return Response({"message": "Level not found."}, status=status.HTTP_404_NOT_FOUND)
                 except MultipleObjectsReturned:
                     level = Level.objects.filter(value=level_value).first()
-                
+                print(level)
                 if level:
                     # check user the answered questions and and pass first unanswered question
                     user_answers = UserAnswer.objects.filter(user=request.user, question__level=level)
-                    question = Question.objects.filter(level=level).exclude(id__in=user_answers.values('question_id')).first() 
+                    question = Question.objects.filter(level=level).first()
+                    print(question)
             else:
                 # return error that user has not completed previous levels
                 return Response({"message": "You have not completed the previous levels."}, status=status.HTTP_400_BAD_REQUEST)

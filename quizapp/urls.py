@@ -20,6 +20,7 @@ urlpatterns= [
 
     path('levels',ClientLevelListView.as_view(),name='client_level_list'),
     path('question/',ClientQuestionListView.as_view(),name='client_question_list'),
+    path('question/<int:level_value>',ClientQuestionListView.as_view(),name='client_question_list'),
     path('user-progress/',ClientUserProgressView.as_view(),name='client_user_progress'),
     path('user-answers/', ClientUserAnswerView.as_view(), name='user-answer-list'),
 
