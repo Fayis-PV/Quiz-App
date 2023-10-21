@@ -169,25 +169,46 @@ class ClientQuestionListView(generics.ListAPIView):
         return questions
 
     def list(self, request, *args, **kwargs):
-        try:
-            questions = self.get_queryset()
-            question = questions.first()
 
-            if not question:
-                # Redirect to user progress page if no unanswered questions
-                return redirect(f'/user-progress/')
+        # Uncomment the following line to allow users to view the previous levels (if the user allowed to check each level even after completion)
+        level_value = kwargs.get('level_value')
+        if level_value:
+            # Check if the user has completed the previous levels before proceeding
+            user_progress = UserProgress.objects.get(user=request.user)
+            if user_progress.level.value < level_value:
+                try:
+                    level = Level.objects.get(value=level_value)
+                except Level.DoesNotExist:
+                    return Response({"message": "Level not found."}, status=status.HTTP_404_NOT_FOUND)
+                except MultipleObjectsReturned:
+                    level = Level.objects.filter(value=level_value).first()
+                
+                if level:
+                    # check user the answered questions and and pass first unanswered question
+                    user_answers = UserAnswer.objects.filter(user=request.user, question__level=level)
+                    question = Question.objects.filter(level=level).exclude(id__in=user_answers.values('question_id')).first() 
+            else:
+                # return error that user has not completed previous levels
+                return Response({"message": "You have not completed the previous levels."}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            try:
+                questions = self.get_queryset()
+                question = questions.first()
+            except Http404:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            
+        if not question:
+            # Redirect to user progress page if no unanswered questions
+            return redirect(f'/user-progress/')
 
-            # Prepare the context for rendering the quiz page
-            context = {
-                'question': question,
-                'user': request.user  # Replace with the actual user data
-            }
+        # Prepare the context for rendering the quiz page
+        context = {
+            'question': question,
+            'user': request.user  # Replace with the actual user data
+        }
 
-            # Render the quiz page
-            return render(request, 'quiz.html', context)
-
-        except Http404:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        # Render the quiz page
+        return render(request, 'quiz.html', context)
     
     
 class ClientUserProgressView(generics.RetrieveUpdateAPIView):
@@ -226,7 +247,9 @@ class ClientUserProgressView(generics.RetrieveUpdateAPIView):
                 return render(request,'progress.html',context)
             else:
                 user_progress.is_completed = True
-                user_answers = UserAnswer.objects.filter(user = user_progress.user).delete()
+                # Uncomment the following line to delete all user answers when all levels are completed (if the user allowed to check each level even after completion)
+                # user_answers = UserAnswer.objects.filter(user = user_progress.user)
+                # user_answers.delete()
                 return Response({"message": "All levels completed."}, status=status.HTTP_200_OK)
 
         return Response({"message": "Level not completed. Keep trying!"}, status=status.HTTP_200_OK)
